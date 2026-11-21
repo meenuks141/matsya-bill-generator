@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-hand: "Chilanka", cursive, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html,
+  body {
+    font-family: var(--font-sans);
+    background-color: #f1f4f7;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+.ledger-paper {
+  background-color: #fcfbf6;
+  background-image: linear-gradient(
+    to bottom,
+    transparent 31px,
+    rgba(30, 58, 95, 0.085) 31px,
+    rgba(30, 58, 95, 0.085) 32px
+  );
+  background-size: 100% 32px;
+}
+
+.ledger-margin-line {
+  background-image: linear-gradient(
+    to right,
+    transparent 34px,
+    rgba(190, 49, 49, 0.24) 34px,
+    rgba(190, 49, 49, 0.24) 35px,
+    transparent 35px,
+    transparent 38px,
+    rgba(190, 49, 49, 0.14) 38px,
+    rgba(190, 49, 49, 0.14) 39px,
+    transparent 39px
+  );
+}
+
+.font-hand {
+  font-family: var(--font-hand);
+}
+
+.font-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

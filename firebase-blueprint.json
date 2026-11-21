@@ -1,0 +1,313 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user profile for Matsya bill ledger.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "displayName", "email", "createdAt", "updatedAt"]
+    },
+    "BillBook": {
+      "title": "BillBook",
+      "description": "Named bill title ledger for a fishnet worker, boat, or team.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "workerPhone": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "billCount": {
+          "type": "number"
+        },
+        "latestNetBalance": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "ownerId",
+        "title",
+        "workerPhone",
+        "notes",
+        "billCount",
+        "latestNetBalance",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Bill": {
+      "title": "Bill",
+      "description": "Individual bill record stored under a BillBook title.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "bookId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "billTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "billDate": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "billNumber": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "languageMode": {
+          "type": "string",
+          "enum": ["mixed", "ml", "en"]
+        },
+        "previousBalance": {
+          "type": "number"
+        },
+        "itemsTotal": {
+          "type": "number"
+        },
+        "varavuTotal": {
+          "type": "number"
+        },
+        "netBalance": {
+          "type": "number"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "bookId",
+        "ownerId",
+        "billTitle",
+        "billDate",
+        "billNumber",
+        "languageMode",
+        "previousBalance",
+        "itemsTotal",
+        "varavuTotal",
+        "netBalance",
+        "notes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "BillItem": {
+      "title": "BillItem",
+      "description": "Line item row (date, item details, price) inside a Bill.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "bookId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "billId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "date": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "details": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "price": {
+          "type": "number"
+        },
+        "sortOrder": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "bookId",
+        "billId",
+        "ownerId",
+        "date",
+        "details",
+        "price",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "VaravuEntry": {
+      "title": "VaravuEntry",
+      "description": "Deduction / Varavu row subtracted from the bill total.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "bookId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "billId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "date": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "amount": {
+          "type": "number"
+        },
+        "sortOrder": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "bookId",
+        "billId",
+        "ownerId",
+        "date",
+        "note",
+        "amount",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private authenticated user profile."
+    },
+    "/billBooks/{bookId}": {
+      "schema": { "$ref": "#/entities/BillBook" },
+      "description": "Bill Title ledger database owned by a user."
+    },
+    "/billBooks/{bookId}/bills/{billId}": {
+      "schema": { "$ref": "#/entities/Bill" },
+      "description": "Saved bills under a specific BillBook title."
+    },
+    "/billBooks/{bookId}/bills/{billId}/items/{itemId}": {
+      "schema": { "$ref": "#/entities/BillItem" },
+      "description": "Line items (date, details, price) belonging to a Bill."
+    },
+    "/billBooks/{bookId}/bills/{billId}/varavu/{varavuId}": {
+      "schema": { "$ref": "#/entities/VaravuEntry" },
+      "description": "Varavu deduction rows belonging to a Bill."
+    }
+  }
+}

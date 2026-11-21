@@ -1,0 +1,313 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isBookOwner(bookId) {
+      return exists(/databases/$(database)/documents/billBooks/$(bookId))
+        && get(/databases/$(database)/documents/billBooks/$(bookId)).data.ownerId == request.auth.uid;
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'email', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'displayName', 'email', 'createdAt', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.displayName is string
+        && data.displayName.size() <= 100
+        && data.email is string
+        && data.email.size() <= 200
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBillBook(data) {
+      return data.keys().hasAll(['id', 'ownerId', 'title', 'workerPhone', 'notes', 'billCount', 'latestNetBalance', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'ownerId', 'title', 'workerPhone', 'notes', 'billCount', 'latestNetBalance', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.title is string
+        && data.title.size() >= 1
+        && data.title.size() <= 120
+        && data.workerPhone is string
+        && data.workerPhone.size() <= 24
+        && data.notes is string
+        && data.notes.size() <= 300
+        && data.billCount is number
+        && data.billCount >= 0
+        && data.billCount <= 100000
+        && data.latestNetBalance is number
+        && data.latestNetBalance >= -100000000
+        && data.latestNetBalance <= 100000000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBill(data) {
+      return data.keys().hasAll(['id', 'bookId', 'ownerId', 'billTitle', 'billDate', 'billNumber', 'languageMode', 'previousBalance', 'itemsTotal', 'varavuTotal', 'netBalance', 'notes', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'bookId', 'ownerId', 'billTitle', 'billDate', 'billNumber', 'languageMode', 'previousBalance', 'itemsTotal', 'varavuTotal', 'netBalance', 'notes', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isValidId(data.bookId)
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.billTitle is string
+        && data.billTitle.size() >= 1
+        && data.billTitle.size() <= 120
+        && data.billDate is string
+        && data.billDate.size() >= 1
+        && data.billDate.size() <= 32
+        && data.billNumber is string
+        && data.billNumber.size() <= 40
+        && data.languageMode in ['mixed', 'ml', 'en']
+        && data.previousBalance is number
+        && data.previousBalance >= -100000000
+        && data.previousBalance <= 100000000
+        && data.itemsTotal is number
+        && data.itemsTotal >= 0
+        && data.itemsTotal <= 100000000
+        && data.varavuTotal is number
+        && data.varavuTotal >= 0
+        && data.varavuTotal <= 100000000
+        && data.netBalance is number
+        && data.netBalance >= -100000000
+        && data.netBalance <= 100000000
+        && data.notes is string
+        && data.notes.size() <= 400
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBillItem(data) {
+      return data.keys().hasAll(['id', 'bookId', 'billId', 'ownerId', 'date', 'details', 'price', 'sortOrder', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'bookId', 'billId', 'ownerId', 'date', 'details', 'price', 'sortOrder', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isValidId(data.bookId)
+        && isValidId(data.billId)
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.date is string
+        && data.date.size() <= 32
+        && data.details is string
+        && data.details.size() >= 1
+        && data.details.size() <= 200
+        && data.price is number
+        && data.price >= 0
+        && data.price <= 10000000
+        && data.sortOrder is number
+        && data.sortOrder >= 0
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidVaravuEntry(data) {
+      return data.keys().hasAll(['id', 'bookId', 'billId', 'ownerId', 'date', 'note', 'amount', 'sortOrder', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'bookId', 'billId', 'ownerId', 'date', 'note', 'amount', 'sortOrder', 'createdAt', 'updatedAt'])
+        && isValidId(data.id)
+        && isValidId(data.bookId)
+        && isValidId(data.billId)
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.date is string
+        && data.date.size() <= 32
+        && data.note is string
+        && data.note.size() <= 200
+        && data.amount is number
+        && data.amount >= 0
+        && data.amount <= 10000000
+        && data.sortOrder is number
+        && data.sortOrder >= 0
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if false;
+      allow create: if isVerifiedUser()
+        && isValidId(userId)
+        && request.auth.uid == userId
+        && isValidUserProfile(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser()
+        && isValidId(userId)
+        && request.auth.uid == userId
+        && isValidUserProfile(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email', 'updatedAt']);
+      allow delete: if false;
+    }
+
+    match /billBooks/{bookId} {
+      allow get: if isSignedIn() && isValidId(bookId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isVerifiedUser()
+        && isValidId(bookId)
+        && isValidBillBook(incoming())
+        && incoming().id == bookId
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser()
+        && isValidId(bookId)
+        && existing().ownerId == request.auth.uid
+        && isValidBillBook(incoming())
+        && incoming().id == existing().id
+        && incoming().ownerId == existing().ownerId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'workerPhone', 'notes', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['billCount', 'latestNetBalance', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'workerPhone', 'notes', 'billCount', 'latestNetBalance', 'updatedAt'])
+        );
+      allow delete: if isVerifiedUser() && isValidId(bookId) && existing().ownerId == request.auth.uid;
+
+      match /bills/{billId} {
+        allow get: if isSignedIn()
+          && isValidId(bookId)
+          && isValidId(billId)
+          && existing().ownerId == request.auth.uid
+          && isBookOwner(bookId);
+        allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+        allow create: if isVerifiedUser()
+          && isValidId(bookId)
+          && isValidId(billId)
+          && isValidBill(incoming())
+          && incoming().id == billId
+          && incoming().bookId == bookId
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time
+          && isBookOwner(bookId);
+        allow update: if isVerifiedUser()
+          && isValidId(bookId)
+          && isValidId(billId)
+          && existing().ownerId == request.auth.uid
+          && isValidBill(incoming())
+          && incoming().id == existing().id
+          && incoming().bookId == existing().bookId
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && isBookOwner(bookId)
+          && (
+            incoming().diff(existing()).affectedKeys().hasOnly(['billTitle', 'billDate', 'billNumber', 'languageMode', 'previousBalance', 'itemsTotal', 'varavuTotal', 'netBalance', 'notes', 'updatedAt']) ||
+            incoming().diff(existing()).affectedKeys().hasOnly(['itemsTotal', 'varavuTotal', 'netBalance', 'updatedAt'])
+          );
+        allow delete: if isVerifiedUser()
+          && isValidId(bookId)
+          && isValidId(billId)
+          && existing().ownerId == request.auth.uid
+          && isBookOwner(bookId);
+
+        match /items/{itemId} {
+          allow get: if isSignedIn()
+            && isValidId(bookId)
+            && isValidId(billId)
+            && isValidId(itemId)
+            && existing().ownerId == request.auth.uid
+            && isBookOwner(bookId);
+          allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+          allow create: if isVerifiedUser()
+            && isValidId(bookId)
+            && isValidId(billId)
+            && isValidId(itemId)
+            && isValidBillItem(incoming())
+            && incoming().id == itemId
+            && incoming().bookId == bookId
+            && incoming().billId == billId
+            && incoming().createdAt == request.time
+            && incoming().updatedAt == request.time
+            && isBookOwner(bookId)
+            && exists(/databases/$(database)/documents/billBooks/$(bookId)/bills/$(billId));
+          allow update: if isVerifiedUser()
+            && isValidId(bookId)
+            && isValidId(billId)
+            && isValidId(itemId)
+            && existing().ownerId == request.auth.uid
+            && isValidBillItem(incoming())
+            && incoming().id == existing().id
+            && incoming().bookId == existing().bookId
+            && incoming().billId == existing().billId
+            && incoming().ownerId == existing().ownerId
+            && incoming().createdAt == existing().createdAt
+            && incoming().updatedAt == request.time
+            && isBookOwner(bookId)
+            && incoming().diff(existing()).affectedKeys().hasOnly(['date', 'details', 'price', 'sortOrder', 'updatedAt']);
+          allow delete: if isVerifiedUser()
+            && isValidId(bookId)
+            && isValidId(billId)
+            && isValidId(itemId)
+            && existing().ownerId == request.auth.uid
+            && isBookOwner(bookId);
+        }
+
+        match /varavu/{varavuId} {
+          allow get: if isSignedIn()
+            && isValidId(bookId)
+            && isValidId(billId)
+            && isValidId(varavuId)
+            && existing().ownerId == request.auth.uid
+            && isBookOwner(bookId);
+          allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+          allow create: if isVerifiedUser()
+            && isValidId(bookId)
+            && isValidId(billId)
+            && isValidId(varavuId)
+            && isValidVaravuEntry(incoming())
+            && incoming().id == varavuId
+            && incoming().bookId == bookId
+            && incoming().billId == billId
+            && incoming().createdAt == request.time
+            && incoming().updatedAt == request.time
+            && isBookOwner(bookId)
+            && exists(/databases/$(database)/documents/billBooks/$(bookId)/bills/$(billId));
+          allow update: if isVerifiedUser()
+            && isValidId(bookId)
+            && isValidId(billId)
+            && isValidId(varavuId)
+            && existing().ownerId == request.auth.uid
+            && isValidVaravuEntry(incoming())
+            && incoming().id == existing().id
+            && incoming().bookId == existing().bookId
+            && incoming().billId == existing().billId
+            && incoming().ownerId == existing().ownerId
+            && incoming().createdAt == existing().createdAt
+            && incoming().updatedAt == request.time
+            && isBookOwner(bookId)
+            && incoming().diff(existing()).affectedKeys().hasOnly(['date', 'note', 'amount', 'sortOrder', 'updatedAt']);
+          allow delete: if isVerifiedUser()
+            && isValidId(bookId)
+            && isValidId(billId)
+            && isValidId(varavuId)
+            && existing().ownerId == request.auth.uid
+            && isBookOwner(bookId);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,82 @@
+// Security test specification for Matsya Firestore rules (Dirty Dozen verification)
+export const DIRTY_DOZEN_CASES = [
+  {
+    name: 'Identity Spoofing on BillBook create',
+    path: '/billBooks/book_1',
+    operation: 'create',
+    payload: { ownerId: 'victim_uid', title: 'Test Book' },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Unverified Email Write',
+    path: '/billBooks/book_1',
+    operation: 'create',
+    auth: { uid: 'u1', email_verified: false },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Shadow Field Injection',
+    path: '/billBooks/book_1',
+    operation: 'create',
+    payload: { isAdmin: true },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Path ID Poisoning',
+    path: '/billBooks/invalid$id!',
+    operation: 'create',
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Client Timestamp Tampering',
+    path: '/billBooks/book_1',
+    operation: 'create',
+    payload: { createdAt: '2020-01-01T00:00:00Z' },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Ownership Transfer Update',
+    path: '/billBooks/book_1',
+    operation: 'update',
+    payload: { ownerId: 'attacker_uid' },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Orphaned Bill Creation',
+    path: '/billBooks/missing_book/bills/bill_1',
+    operation: 'create',
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Cross-Tenant Subcollection Get',
+    path: '/billBooks/victim_book/bills/bill_1',
+    operation: 'get',
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Blanket List Scraping',
+    path: '/billBooks',
+    operation: 'list',
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'PII Leak on Users Collection',
+    path: '/users/victim_uid',
+    operation: 'get',
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Value Poisoning on BillBook Title',
+    path: '/billBooks/book_1',
+    operation: 'update',
+    payload: { title: 'x'.repeat(250) },
+    expected: 'PERMISSION_DENIED',
+  },
+  {
+    name: 'Invalid languageMode Enum',
+    path: '/billBooks/book_1/bills/bill_1',
+    operation: 'create',
+    payload: { languageMode: 'invalid' },
+    expected: 'PERMISSION_DENIED',
+  },
+];

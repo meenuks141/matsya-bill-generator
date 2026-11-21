@@ -1,0 +1,6 @@
+{
+  "name": "Matsya",
+  "description": "Minimal handwritten Malayalam & English bill ledger and WhatsApp photo bill generator for fishnet workers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
